@@ -1,11 +1,16 @@
 const express = require("express");
-const { registerUser, loginUser, getAllUsers } = require("../controllers/userController");
-const { protect } = require("../middlewares/authMiddleware");
+const { getAllUsers } = require("../services/authService");
+const { authMiddleware, authorizeRoles } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.get("/", protect, getAllUsers);
+router.get("/users", authMiddleware, authorizeRoles("ADMIN"), async (req, res) => {
+  try {
+    const users = await getAllUsers();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

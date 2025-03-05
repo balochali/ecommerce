@@ -9,18 +9,19 @@ const generateToken = (user) => {
   });
 };
 
-const register = async (name, email, password) => {
+const register = async (name, email, password, role = "USER") => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
   if (existingUser) throw new Error("User already exists");
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { name, email, password: hashedPassword },
+    data: { name, email, password: hashedPassword, role },
   });
 
   return { token: generateToken(user), user };
 };
+
 
 const login = async (email, password) => {
   const user = await prisma.user.findUnique({ where: { email } });
